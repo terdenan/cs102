@@ -56,6 +56,3 @@ def decrypt_vigenere(ciphertext, keyword):
     for i in range(len(ciphertext)):
         plaintext += next_symbol(ciphertext[i], keyword[i % len(keyword)])
     return plaintext
-
-print(encrypt_vigenere("ATTACKATDAWN", "LEMON"))
-print(decrypt_vigenere("LXFOPVEFRNHR", "LEMON"))
