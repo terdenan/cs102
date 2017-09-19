@@ -44,7 +44,7 @@ def multiplicative_inverse(e, phi):
             d, x, y = gcdex(b, a % b)
             return d, y, x - y * (a // b)
 
-    d, x, y = gcdex(7, 40)
+    d, x, y = gcdex(e, phi)
     return x % phi
 
 
@@ -56,11 +56,8 @@ def generate_keypair(p, q):
         raise ValueError('p and q cannot be equal')
 
     n = p * q
-
     phi = (p - 1) * (q - 1)
-
     e = random.randrange(1, phi)
-
     g = gcd(e, phi)
     while g != 1:
         e = random.randrange(1, phi)
