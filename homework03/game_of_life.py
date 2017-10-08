@@ -23,17 +23,12 @@ class CellList:
         else:
             fileData = [c for c in open(filename).read() if c in '01']
             grid = []
-            test = []
             for i in range(cell_height):
                 col = []
-                test1 = []
                 for j in range(cell_width):
                     symbol = int(fileData[i*cell_width+j])
-                    test1.append(symbol)
                     col.append(Cell(symbol))
-                test.append(test1)
                 grid.append(col)
-            pp(test)
             self.grid = grid
 
     def get_neighbours(self, cell):
