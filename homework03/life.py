@@ -5,7 +5,7 @@ from copy import deepcopy
 
 
 class GameOfLife:
-    def __init__(self, width = 640, height = 480, cell_size = 10, speed = 10):
+    def __init__(self, width=640, height=480, cell_size=10, speed=10):
         self.width = width
         self.height = height
         self.cell_size = cell_size
@@ -26,7 +26,8 @@ class GameOfLife:
 
     def draw_grid(self):
         for x in range(0, self.width, self.cell_size):
-            pygame.draw.line(self.screen, pygame.Color('black'), (x, 0), (x, self.height))
+            pygame.draw.line(self.screen, pygame.Color('black'),
+                             (x, 0), (x, self.height))
 
         for y in range(0, self.height, self.cell_size):
             pygame.draw.line(self.screen, pygame.Color('black'),
