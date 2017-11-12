@@ -4,8 +4,7 @@ from pprint import pprint as pp
 
 
 DOMAIN = "https://api.vk.com/method"
-ACCESS_TOKEN = "9e2b793e5cb009775d94bd2d1bd375dd970d8dbb105b542c8e5\
-626c55f07c5f2f05250ae3d0ee5d689695"
+ACCESS_TOKEN = "3c972e23c1f0119d2f7dc332c8857e4ddd102b483a3dfb4f82bba67fd3a840905c557a02c7811490a169e"
 
 
 def get_friends(user_id, fields):
@@ -55,3 +54,6 @@ def age_predict(user_id):
         counter += diff.total_seconds() // (60 * 60 * 24 * 365)
     return counter // len(bdates)
 
+if __name__ == '__main__':
+    predicted_age = age_predict(145458606)
+    print(predicted_age)

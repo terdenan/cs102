@@ -67,7 +67,7 @@ def count_dates_from_messages(messages):
 
 
 if __name__ == '__main__':
-    messages = messages_get_history(163542319)
+    messages = messages_get_history(223703977)
     x, y = count_dates_from_messages(messages)
     data = [go.Scatter(x=x, y=y)]
     py.plot(data)
