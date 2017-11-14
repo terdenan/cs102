@@ -2,37 +2,48 @@ import requests
 import igraph
 import numpy as np
 import time
+import datetime
+from vk_api import get_friends
 from pprint import pprint as pp
 from igraph import Graph, plot
 
 
-DOMAIN = "https://api.vk.com/method"
-ACCESS_TOKEN = "3c972e23c1f0119d2f7dc332c8857e4ddd102b483a3dfb4f82bba67fd3a840905c557a02c7811490a169e"
-
 def get_network(users_ids, as_edgelist=True):
-
-    vertices = [i for i in range(len(users_ids))]
     edges = []
+    matrix = [[0 for j in range(len(users_ids))]
+              for i in range(len(users_ids))]
 
     for i, user_id in enumerate(users_ids):
-        query_params = {
-            'domain': DOMAIN,
-            'access_token': ACCESS_TOKEN,
-            'user_id': user_id
-        }
-        query = "{domain}/friends.get?access_token={access_token}\
-&user_id={user_id}&v=5.53".format(**query_params)
-        response = requests.get(query)
-        friends_list = response.json()['response']['items']
+        date1 = datetime.datetime.now()
+        response = get_friends(user_id)
+        if response.get('error'):
+            continue
+        friends_list = response['response']['items']
         for j in range(i + 1, len(users_ids)):
             if users_ids[j] in friends_list:
-                edges.append((i, j))
-        pp(response)
-        time.sleep(0.3333)
+                if as_edgelist:
+                    edges.append((i, j))
+                else:
+                    matrix[i][j] = matrix[j][i] = 1
+        date2 = datetime.datetime.now()
+        time.sleep(max(0, 0.33334 - (date2 - date1).total_seconds()))
+        print("slept for", max(0, 0.33334 - (date2 - date1).total_seconds()))
 
-    g = Graph(vertex_attrs={"label":vertices},
-    edges=edges, directed=False)
+    if as_edgelist:
+        return edges
+    else:
+        return matrix
 
+
+if __name__ == '__main__':
+    response = get_friends(145458606)
+    friends_list = response.get('response').get('items')
+
+    vertices = [i for i in range(len(friends_list))]
+    edges = get_network(friends_list)
+
+    g = Graph(vertex_attrs={"label": vertices},
+              edges=edges, directed=False)
     N = len(vertices)
     visual_style = {}
     visual_style["layout"] = g.layout_fruchterman_reingold(
@@ -40,21 +51,8 @@ def get_network(users_ids, as_edgelist=True):
         area=N**3,
         repulserad=N**3)
 
-    # communities = g.community_edge_betweenness(directed=False)
-    # clusters = communities.as_clustering()
-    # pal = igraph.drawing.colors.ClusterColoringPalette(len(clusters))
-    # g.vs['color'] = pal.get_many(clusters.membership)
+    clusters = g.community_multilevel()
+    pal = igraph.drawing.colors.ClusterColoringPalette(len(clusters))
+    g.vs['color'] = pal.get_many(clusters.membership)
 
     plot(g, **visual_style)
-            
-
-
-if __name__ == '__main__':
-    get_network([52022332, # Еркежан
-                 60355185, # Влад
-                 52972873, # Паша
-                 89253594, # Севиль
-                 145458606, # Я
-                 101425819, # Мадина
-                 144772087, # Яна
-                 56200185]) # Лиза
