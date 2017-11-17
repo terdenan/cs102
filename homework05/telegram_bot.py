@@ -42,37 +42,73 @@ def getScheduleByDay(web_page, day_number):
 
     return times_list, locations_list, lessons_list
 
-@bot.message_handler(commands=['monday'])
-def handle_monday(message):
-    _, group = message.text.split()
-    web_page = getWebPage()
-    times_lst, locations_lst, lessons_lst = getScheduleByDay(web_page, 1)
+def getTommorow():
+    today = datetime.datetime.now()
+    tommorow = today
+    if (today.weekday() == 5):
+        tommorow += datetime.timedelta(days=2)
+    else:
+        tommorow += datetime.timedelta(days=1)
 
-    resp = ''
-    for time, location, lession in zip(times_lst, locations_lst, lessons_lst):
-        resp += '<b>{}</b>, {}, {}\n'.format(time, location, lession)
+    return tommorow
 
-    bot.send_message(message.chat.id, resp, parse_mode='HTML')
+def transformInterval(interval):
+    now = datetime.datetime.now()
+    start, end = interval.split('-')
+
+    hour, minute = start.split(':')
+    start = now.replace(hour=int(hour), minute=int(minute))
+
+    hour, minute = end.split(':')
+    end = now.replace(hour=int(hour), minute=int(minute))
+
+    return start, end
+
+def getNearLesson(schedule):
+    near_lesson = None
+    now = datetime.datetime.now()
+    times_lst, locations_lst, lessons_lst = schedule
+    for i in range(len(times_lst)):
+        start, end = transformInterval(times_lst[i])
+        if (now < end):
+            near_lesson = i
+            break
+
+    if near_lesson is None:
+        return None
+
+    near_lesson = zip(times_lst, locations_lst, lessons_lst)[near_lesson]
+    resp = '<b>Ближайший урок:</b>\n'
+    resp += '<b>{}</b>, {}, {}\n'.format(lesson=near_lesson)
+    return resp
+
 
 @bot.message_handler(commands=['near_lesson'])
 def handle_near_lesson(message):
-    pass
+    today = datetime.datetime.now()
+    tmmrw = getTommorow()
+    web_page = getWebPage()
+    resp = getNearLesson(getScheduleByDay(web_page, today.weekday() + 1))
+    if resp is None:
+        times_lst, locations_lst, lessons_lst = getScheduleByDay(web_page, tmmrw.weekday() + 1)
+        resp = '<b>Ближайший урок:</b>\n'
+        resp += '<b>{}</b>, {}, {}\n'.format(times_lst[0], locations_lst[0], lessons_lst[0])
 
+    bot.send_message(message.chat.id, resp, parse_mode='HTML')
 
 @bot.message_handler(commands=['tommorow'])
 def handle_tommorow(message):
     _, group = message.text.split()
 
-    today = datetime.datetime.now()
-    week_number = getWeekNumber(today)
-    tom_day_number = (today.weekday() + 1) % 7 % 6
-    if not (tom_day_number):
-        week_number = (week_number % 2) + 1
+
+    tommorow = getTommorow()
+    week_number = getWeekNumber(tommorow)
+    tommorow_num = tommorow.weekday()
 
     web_page = getWebPage()
-    times_lst, locations_lst, lessons_lst = getScheduleByDay(web_page, tom_day_number + 1)
+    times_lst, locations_lst, lessons_lst = getScheduleByDay(web_page, tommorow_num + 1)
 
-    resp = '<b>{}</b>:\n'.format(days[tom_day_number])
+    resp = '<b>{}</b>:\n'.format(days[tommorow_num])
     for time, location, lession in zip(times_lst, locations_lst, lessons_lst):
         resp += '<b>{}</b>, {}, {}\n'.format(time, location, lession)
 
@@ -91,6 +127,18 @@ def handle_all(message):
         for time, location, lession in zip(times_lst, locations_lst, lessons_lst):
             resp += '<b>{}</b>, {}, {}\n'.format(time, location, lession)
         resp += '\n'
+
+    bot.send_message(message.chat.id, resp, parse_mode='HTML')
+
+@bot.message_handler(commands=['monday'])
+def handle_monday(message):
+    _, group = message.text.split()
+    web_page = getWebPage()
+    times_lst, locations_lst, lessons_lst = getScheduleByDay(web_page, 1)
+
+    resp = ''
+    for time, location, lession in zip(times_lst, locations_lst, lessons_lst):
+        resp += '<b>{}</b>, {}, {}\n'.format(time, location, lession)
 
     bot.send_message(message.chat.id, resp, parse_mode='HTML')
 

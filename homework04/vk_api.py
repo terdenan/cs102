@@ -1,9 +1,10 @@
 import requests
-from config import config
 import time
+from config import config
+from requests import exceptions
 
 
-def get(query, timeout=5, max_retries=5, backoff_factor=0.3):
+def get(query, params={}, timeout=5, max_retries=5, backoff_factor=0.3):
     """ Выполнить GET-запрос
 
     :param query: тело GET запроса
@@ -11,20 +12,18 @@ def get(query, timeout=5, max_retries=5, backoff_factor=0.3):
     :param max_retries: максимальное число повторных запросов
     :param backoff_factor: коэффициент экспоненциального нарастания задержки
     """
-    delay = 1
-    response = {}
-    while max_retries:
+    for n in range(max_retries):
         try:
-            response = requests.get(query, timeout=timeout)
-            break
-        except requests.exceptions.Timeout:
-            print("Timeout exception")
-
-        time.sleep(delay)
-        max_retries -= 1
-        delay *= (1.0 + backoff_factor)
-
-    return response
+            response = requests.get(query, params=params, timeout=timeout)
+            content_type = response.headers.get('Content-Type')
+            if not content_type == "application/json; charset=utf-8":
+                raise
+            return response
+        except requests.exceptions.RequestException:
+            if n == max_retries - 1:
+                raise
+            backoff_value = backoff_factor * (2 ** n)
+            time.sleep(backoff_value)
 
 
 def get_friends(user_id, fields=''):
@@ -34,14 +33,13 @@ def get_friends(user_id, fields=''):
     assert isinstance(fields, str), "fields must be string"
     assert user_id > 0, "user_id must be positive integer"
     query_params = {
-        'domain': config.get("DOMAIN"),
         'access_token': config.get("ACCESS_TOKEN"),
         'user_id': user_id,
-        'fields': fields
+        'fields': fields,
+        'v': config.get('v')
     }
-    query = "{domain}/friends.get?access_token={access_token}\
-&user_id={user_id}&fields={fields}&v=5.53".format(**query_params)
-    response = get(query)
+    url = "{}/friends.get".format(config.get("DOMAIN"))
+    response = get(url, params=query_params)
     return response.json()
 
 
@@ -57,18 +55,17 @@ def get_messages_history(user_id, offset=0, count=200):
         'access_token': config.get("ACCESS_TOKEN"),
         'user_id': user_id,
         'offset': offset,
-        'count': min(count, max_count)
+        'count': min(count, max_count),
+        'v': config.get('v')
     }
     messages = []
 
     while count > 0:
-        cur_count = min(count, max_count)
-        query = "{domain}/messages.getHistory?access_token={access_token}\
-&user_id={user_id}&count={count}&offset={offset}&v=5.53".format(**query_params)
-        count -= cur_count
+        url = "{}/messages.getHistory".format(config.get("DOMAIN"))
+        response = get(url, params=query_params)
+        count -= min(count, max_count)
         query_params['offset'] += 200
-        query_params[count] = min(count, max_count)
-        response = get(query)
+        query_params['count'] = min(count, max_count)
         messages += response.json()['response']['items']
         time.sleep(0.333333334)
 
