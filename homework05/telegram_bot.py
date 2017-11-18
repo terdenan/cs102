@@ -2,6 +2,7 @@ import telebot
 import config
 import datetime
 from bs4 import BeautifulSoup
+from jinja2 import Template
 
 
 bot = telebot.TeleBot(config.token)
@@ -135,11 +136,11 @@ def handle_monday(message):
     _, group = message.text.split()
     web_page = getWebPage()
     times_lst, locations_lst, lessons_lst = getScheduleByDay(web_page, 1)
-
-    resp = ''
-    for time, location, lession in zip(times_lst, locations_lst, lessons_lst):
-        resp += '<b>{}</b>, {}, {}\n'.format(time, location, lession)
-
+    data = zip(times_lst, locations_lst, lessons_lst)
+    html = open('templates/single_day.html').read()
+    template = Template(html)
+    resp = template.render(data=data)
+    print(resp)
     bot.send_message(message.chat.id, resp, parse_mode='HTML')
 
 if __name__ == '__main__':

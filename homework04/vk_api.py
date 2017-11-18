@@ -4,6 +4,15 @@ from config import config
 from requests import exceptions
 
 
+"""
+class MyException(Exception):
+    pass
+
+class JSONException(MyException):
+    pass
+"""
+
+
 def get(query, params={}, timeout=5, max_retries=5, backoff_factor=0.3):
     """ Выполнить GET-запрос
 
