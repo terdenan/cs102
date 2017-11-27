@@ -1,2 +1,3 @@
-<b>Ближайшие урок:</b>
-<b>{% time %}</b>, {% location %}, {% lesson %}
+{% set time, location, lesson = lesson %}
+<b>Ближайший урок:</b>
+<b>{{ time }}</b>, {{ location }}, {{ lesson }}

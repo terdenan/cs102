@@ -1,2 +1,6 @@
-{% for item in data %}{% set time, location, lesson = item %}<b>{{ time }}</b>, {{ location }}, {{ lesson }}
+{%
+    set days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"]
+%}
+{{ days[num - 1] }}:
+{% for item in schedule %}{% set time, location, lesson = item %}<b>{{ time }}</b>, {{ location }}, {{ lesson }}
 {% endfor %}
