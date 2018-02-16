@@ -13,7 +13,7 @@ def get_news(url='https://news.ycombinator.com/news', n_pages=1):
         news += extract_news(page)
 
     return news
-        
+
 
 def extract_news(page):
     news = []

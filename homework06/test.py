@@ -2,8 +2,10 @@ import csv
 import string
 from classifier import NaiveBayesClassifier
 
+
 with open("SMSSpamCollection") as f:
     data = list(csv.reader(f, delimiter="\t"))
+
 
 def clean(s):
     translator = str.maketrans("", "", string.punctuation)

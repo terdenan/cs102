@@ -4,7 +4,7 @@ from math import log1p
 
 
 class NaiveBayesClassifier:
-    
+
     def __init__(self, alpha=1.0):
         self.alpha = alpha
 
@@ -34,7 +34,7 @@ class NaiveBayesClassifier:
                 params[clss] = (Nic + ALPHA) / (Nc + ALPHA * D)
 
             model['likelihood'][word] = params
-                
+
         self.model = model
 
     def predict(self, X):
@@ -50,7 +50,7 @@ class NaiveBayesClassifier:
 
                 for word in words:
                     word_params = self.model['likelihood'].get(word, None)
-                    
+
                     if word_params:
                         total_score += log1p(word_params[clss] - 1)
 
@@ -61,7 +61,6 @@ class NaiveBayesClassifier:
 
         return answers_lst
 
-    
     def score(self, X_test, y_test):
         """ Returns the mean accuracy on the given test data and labels. """
         total_count = len(y_test)
@@ -71,7 +70,6 @@ class NaiveBayesClassifier:
                 correct += 1
 
         return correct / total_count
-
 
     def _normalize_string(self, string):
         litter = ['.', ',', '!', '"', '\'', ':', ' -']
