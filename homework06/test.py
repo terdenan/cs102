@@ -21,6 +21,6 @@ X = [clean(x).lower() for x in X]
 cnt = 3900
 X_train, y_train, X_test, y_test = X[:cnt], y[:cnt], X[cnt:], y[cnt:]
 
-model = NaiveBayesClassifier(0.000000001)
+model = NaiveBayesClassifier(1)
 model.fit(X_train, y_train)
 print(model.score(X_test, y_test))
