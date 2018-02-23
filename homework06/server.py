@@ -14,8 +14,9 @@ from classifier import NaiveBayesClassifier
 
 
 Base = declarative_base()
-Base.metadata.create_all(bind=engine)
 engine = create_engine("sqlite:///news.db")
+
+Base.metadata.create_all(bind=engine)
 session = sessionmaker(bind=engine)
 
 
@@ -34,7 +35,7 @@ class News(Base):
 @route('/news')
 def news_list():
     rows = s.query(News).filter(News.label == None).all()
-    return template('news_template', rows=rows)
+    return template('templates/news_template', rows=rows)
 
 
 @route('/update_news')
@@ -54,7 +55,7 @@ def add_label():
     label, id = request.query['label'], request.query['id']
     s.query(News).filter(News.id == id).update({'label': label})
     s.commit()
-    redirect('/news')
+    redirect('/recommendations')
 
 
 @route('/recommendations')
@@ -66,7 +67,7 @@ def recommendations():
         if prediction == 'good':
             news.append(row)
 
-    return template('news_recommendations', rows=news)
+    return template('templates/news_recommendations', rows=news)
 
 
 def get_training_data():
@@ -83,7 +84,9 @@ if __name__ == '__main__':
     model = NaiveBayesClassifier(1)
     model.fit(X_train, y_train)
     run(host='localhost', port=8080)
-    # cnt = 80
+
+    #print(len(s.query(News).filter(News.label != None).all()))    
+    # cnt = 183
     # X, y = get_training_data()
     # X_train, y_train, X_test, y_test = X[:cnt], y[:cnt], X[cnt:], y[cnt:]
     # model = NaiveBayesClassifier(1)
