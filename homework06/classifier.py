@@ -1,5 +1,4 @@
 from collections import Counter
-from pprint import pprint as pp
 from math import log1p
 
 
@@ -11,9 +10,10 @@ class NaiveBayesClassifier:
     def fit(self, X, y):
         """ Fit Naive Bayes classifier according to X, y. """
         self.appearance_by_class = self.count_appearances(X, y)
-
-        self.counted_words = dict(Counter(self.get_normalized_words(X)))
         self.counted_classes = dict(Counter(y))
+
+        words = [word for sentence in X for word in sentence.split()]
+        self.counted_words = dict(Counter(words))
 
         self.model = {
             'classes': {},
@@ -40,7 +40,7 @@ class NaiveBayesClassifier:
         answers_lst = []
 
         for sentence in X:
-            words = self.get_normalized_words(sentence.split())
+            words = sentence.split()
             possible_answers = []
 
             for cur_class in self.model['classes']:
@@ -88,33 +88,10 @@ class NaiveBayesClassifier:
         return total_count
 
     @classmethod
-    def normalize_string(cls, string):
-        litter = ['.', ',', '!', '"', '\'', ':', ' -']
-        clear_string = string.lower()
-
-        for symbol in litter:
-            clear_string = clear_string.replace(symbol, '')
-
-        return clear_string
-
-    @classmethod
-    def get_normalized_words(cls, X):
-        words = []
-
-        for sentence in X:
-            clear_sentence = sentence.lower()
-            clear_sentence = cls.normalize_string(clear_sentence)
-
-            words += clear_sentence.split()
-
-        return words
-
-    @classmethod
     def count_appearances(cls, X, y):
         lst = []
 
         for sentence, clss in zip(X, y):
-            sentence = cls.normalize_string(sentence)
             for word in sentence.split():
                 lst.append((word, clss))
 
