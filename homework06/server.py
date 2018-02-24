@@ -1,35 +1,8 @@
-import sqlalchemy
 from aggregator import get_news
-
-from pprint import pprint as pp
-
 from bottle import request, route, run, template, redirect
-
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, String, Integer
-from sqlalchemy import create_engine, exists
-from sqlalchemy.orm import sessionmaker
-
 from classifier import NaiveBayesClassifier
-
-
-Base = declarative_base()
-engine = create_engine("sqlite:///news.db")
-
-Base.metadata.create_all(bind=engine)
-session = sessionmaker(bind=engine)
-
-
-class News(Base):
-    __tablename__ = "news"
-    id = Column(Integer, primary_key=True)
-    title = Column(String)
-    normal_title = Column(String)
-    author = Column(String)
-    url = Column(String)
-    comments = Column(Integer)
-    points = Column(Integer)
-    label = Column(String)
+from pprint import pprint as pp
+from db import session, News, exists
 
 
 @route('/news')
@@ -85,7 +58,7 @@ if __name__ == '__main__':
     model.fit(X_train, y_train)
     run(host='localhost', port=8080)
 
-    #print(len(s.query(News).filter(News.label != None).all()))    
+    # print(len(s.query(News).filter(News.label != None).all()))
     # cnt = 183
     # X, y = get_training_data()
     # X_train, y_train, X_test, y_test = X[:cnt], y[:cnt], X[cnt:], y[cnt:]
