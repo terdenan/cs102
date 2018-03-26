@@ -28,7 +28,7 @@ def add_label():
     label, id = request.query['label'], request.query['id']
     s.query(News).filter(News.id == id).update({'label': label})
     s.commit()
-    redirect('/recommendations')
+    redirect('/news')
 
 
 @route('/recommendations')
