@@ -57,16 +57,18 @@ class FileProducer(object):
 
 class AsyncServer(asyncore.dispatcher):
 
-    def __init__(self, host="127.0.0.1", port=9000):
+    def __init__(self, host="127.0.0.1", port=9000, handler_class=None):
         super().__init__()
+        self.handler_class = handler_class
         self.create_socket()
         self.set_reuse_addr()
         self.bind((host, port))
         self.listen(5)
 
     def handle_accepted(self, sock, addr):
-        log.debug(f"Incoming connection from {addr}")
-        AsyncHTTPRequestHandler(sock)
+        #log.debug(f"Incoming connection from {addr}")
+        self.handler_class(sock)
+        #AsyncHTTPRequestHandler(sock)
 
     def serve_forever(self):
         asyncore.loop()
@@ -241,7 +243,7 @@ def parse_args():
 
 
 def run():
-    server = AsyncServer(host=args.host, port=args.port)
+    server = AsyncServer(host=args.host, port=args.port, handler_class=AsyncHTTPRequestHandler)
     server.serve_forever()
 
 
