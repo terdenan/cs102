@@ -83,8 +83,10 @@ class AsyncHTTPRequestHandler(asynchat.async_chat):
         self.req_data = ""
         self.post_data = bytes()
         self.headers = None
-        self.method = None
+        self.request_method = None
         self.response = ""
+        self.server_name = 'localhost'
+        self.server_port = 9000
 
     def collect_incoming_data(self, data):
         if not self.reading_headers:
@@ -99,15 +101,18 @@ class AsyncHTTPRequestHandler(asynchat.async_chat):
         if self.reading_headers:
             method, path, headers = self.req_data.split(None, 2)
 
-            self.method = method
+            self.request_method = method
+            self.path = path
+
+
             self.parse_headers(headers)
             self.req_path = urlparse("http://" + self.headers['Host'] + path).path
-            if (self.method == "POST"):
+            if (self.request_method == "POST"):
                 clen = int(self.headers['Content-Length'])
                 if clen > 0:
                     self.reading_headers = False
                     self.set_terminator(clen)
-            elif (self.method == "GET"):
+            elif (self.request_method == "GET"):
                 self.handle_request()
         else:
             self.handle_request()
@@ -124,7 +129,7 @@ class AsyncHTTPRequestHandler(asynchat.async_chat):
             self.headers[keyword] = value
 
     def handle_request(self):
-        method_name = 'do_' + self.method
+        method_name = 'do_' + self.request_method
         if not hasattr(self, method_name):
             self.send_error(405)
             self.handle_close()
