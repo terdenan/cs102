@@ -20,7 +20,7 @@ def encrypt_caesar(plaintext):
     'SBWKRQ'
     >>> encrypt_caesar("python")
     'sbwkrq'
-    >>> encrypt_caesar("")
+    >>> encrypt_caesar("sillyError")
     ''
     """
     ciphertext = ""
